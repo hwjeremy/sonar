@@ -5,18 +5,27 @@
 #include <EthernetUdp.h>
 
 byte mac[] = {};
-IPAddress ip(192, 168, 1, 101);
-IPAddress target(192, 168, 1, 100); //target minnie
+IPAddress localIp(192, 168, 1, 101);
+IPAddress targetIp(192, 168, 1, 100); //target minnie
+short port = 1234;
 
-unsigned int port = 1234;
+short waitTime = 5000; //in milliseconds
 
 EthernetUDP Udp;
 
 void setup() {
-	Ethernet.begin(mac, ip); //dns & gateway default to ip with final octet 1
+	Ethernet.begin(mac, localIp); //dns & gateway default to ip with final octet 1
 	Udp.begin(port);
 }
 
 void loop() {
-
+	//get sensor data
+	
+	//send sensor data
+	Udp.beginPacket(targetIp, port);
+	Udp.write("data");
+	Udp.endPacket;
+	
+	//wait before next transmission
+	delay(waitTime);
 }
