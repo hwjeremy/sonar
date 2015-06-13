@@ -34,10 +34,7 @@ void setup() {
 
 void loop() {
 	//get sensor data
-		//v = 331.4 + 0.6T m/s, T = temp in degrees celsius
-		//v = 331.4 + 0.6T m/s + 0.0124*H, H = relative humidity %
-	
-	unsigned int pingTime = pinger.ping();
+	unsigned int pingTime = pinger.ping(); //in microseconds
 		//consider sending several pings a-la NewPing.h ping_median
 	
 	float h = dht.readHumidity();
@@ -54,7 +51,7 @@ void loop() {
 	
 	//send sensor data
 	Udp.beginPacket(targetIp, port);
-	Udp.write("data");
+	Udp.write("data - ping time, humidity, temperature");
 	Udp.endPacket;
 	
 	//wait before next transmission
