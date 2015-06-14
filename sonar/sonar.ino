@@ -1,5 +1,5 @@
 // sonar
-// to control an Arduino Uno based hypersonic distance sensor
+// to control an Arduino Uno based ultrasonic distance sensor
 // this code is not portable
 
 #include <SPI.h>
