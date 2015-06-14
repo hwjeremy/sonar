@@ -1,4 +1,6 @@
 // sonar
+// to control an Arduino Uno based hypersonic distance sensor
+// this code is not portable
 
 #include <SPI.h>
 #include <Ethernet.h>
@@ -49,9 +51,26 @@ void loop() {
 		dhtValid = true;
 	}
 	
+	//prepare packet data
+	//uno stores 16-bit ints & 32 bit floats
+	byte packetData[10];
+	
+	packetData[0] = (pingTime >> 8) & 0xFF;
+	packetData[1] = pingTime & 0xFF;
+	
+	packetData[2] = (h >> 24) & 0xFF;
+	packetData[3] = (h >> 16) & 0xFF;
+	packetData[4] = (h >> 8) & 0xFF;
+	packetData[5] = h & 0xFF;
+	
+	packetData[6] = (t >> 24) & 0xFF;
+	packetData[7] = (t >> 16) & 0xFF;
+	packetData[8] = (t >> 8) & 0xFF;
+	packetData[9] = t & 0xFF;
+	
 	//send sensor data
 	Udp.beginPacket(targetIp, port);
-	Udp.write("data - ping time, humidity, temperature");
+	Udp.write(packetData, 10);
 	Udp.endPacket;
 	
 	//wait before next transmission
