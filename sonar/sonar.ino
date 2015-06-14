@@ -44,17 +44,17 @@ void loop() {
 	
 	//check for a bad sensor read, set to 0 and handle server-side
 	//we know that relative humidity & temp are overwhelmingly unlikely to ever = 0
-	if (isnan(h)) {h = 0}
-	if (isnan(t)) {t = 0}
+	if (isnan(h)) {h = 0;}
+	if (isnan(t)) {t = 0;}
 	
 	//prepare packet data
 	//uno uses 16-bit ints & 32 bit floats
-	byte packetData[10]
+	byte packetData[10];
 	
 	packetData[0] = (pingTime >> 8) & 0xFF;
 	packetData[1] = pingTime & 0xFF;
 	
-	union {float humiFloat, byte humiBytes[4];} humiUnion;
+	union {float humiFloat; byte humiBytes[4];} humiUnion;
 	humiUnion.humiFloat = h;
 	packetData[2] = humiUnion.humiBytes[0];
 	packetData[3] = humiUnion.humiBytes[1];
@@ -71,7 +71,7 @@ void loop() {
 	//send the packet
 	Udp.beginPacket(targetIp, port);
 	Udp.write(packetData, 10);
-	Udp.endPacket;
+	Udp.endPacket();
 	
 	//wait before next transmission
 	delay(waitTime);
