@@ -22,6 +22,7 @@ const short maxDistance = 400; //in centimetres - check tank height!
 NewPing pinger(pin_trigger, pin_echo, maxDistance);
 
 //temp & humidity
+#define DHTTYPE DHT22
 const byte pin_dht = 3;
 const byte dhtType = 22;
 bool dhtValid = false;
