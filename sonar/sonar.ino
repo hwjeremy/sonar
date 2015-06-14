@@ -10,6 +10,8 @@
 
 //network
 byte mac[] = {}; //set mac!
+byte sensorId = 1;
+byte sensorType = 1;
 IPAddress localIp(192, 168, 1, 101);
 IPAddress targetIp(192, 168, 1, 100); //target minnie
 const short port = 1234;
@@ -48,24 +50,27 @@ void loop() {
 	
 	//prepare packet data
 	//uno uses 16-bit ints & 32 bit floats
-	byte packetData[10];
+	byte packetData[12];
 	
-	packetData[0] = (pingTime >> 8) & 0xFF;
-	packetData[1] = pingTime & 0xFF;
+	packetData[0] = sensorType;
+	packetData[1] = sensorId;
+	
+	packetData[2] = (pingTime >> 8) & 0xFF;
+	packetData[3] = pingTime & 0xFF;
 	
 	union {float humiFloat; byte humiBytes[4];} humiUnion;
 	humiUnion.humiFloat = h;
-	packetData[2] = humiUnion.humiBytes[0];
-	packetData[3] = humiUnion.humiBytes[1];
-	packetData[4] = humiUnion.humiBytes[2];
-	packetData[5] = humiUnion.humiBytes[3];
+	packetData[4] = humiUnion.humiBytes[0];
+	packetData[5] = humiUnion.humiBytes[1];
+	packetData[6] = humiUnion.humiBytes[2];
+	packetData[7] = humiUnion.humiBytes[3];
 
 	union {float tempFloat; byte tempBytes[4];} tempUnion;
 	tempUnion.tempFloat = t;
-	packetData[6] = tempUnion.tempBytes[0];
-	packetData[7] = tempUnion.tempBytes[1];
-	packetData[8] = tempUnion.tempBytes[2];
-	packetData[9] = tempUnion.tempBytes[3];
+	packetData[8] = tempUnion.tempBytes[0];
+	packetData[9] = tempUnion.tempBytes[1];
+	packetData[10] = tempUnion.tempBytes[2];
+	packetData[11] = tempUnion.tempBytes[3];
 	
 	//send the packet
 	Udp.beginPacket(targetIp, port);
