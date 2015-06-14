@@ -38,38 +38,37 @@ void setup() {
 void loop() {
 	//get sensor data
 	unsigned int pingTime = pinger.ping(); //in microseconds
-		//consider sending several pings a-la NewPing.h ping_median
-	
+
 	float h = dht.readHumidity();
 	float t = dht.readTemperature();
 	
-	if (isnan(h) || isnan(t))
-	{
-		dhtValid = false;
-	}
-	else
-	{
-		dhtValid = true;
-	}
+	//check for a bad sensor read, set to 0 and handle server-side
+	//we know that relative humidity & temp are overwhelmingly unlikely to ever = 0
+	if (isnan(h)) {h = 0}
+	if (isnan(t)) {t = 0}
 	
 	//prepare packet data
-	//uno stores 16-bit ints & 32 bit floats
-	byte packetData[10];
+	//uno uses 16-bit ints & 32 bit floats
+	byte packetData[10]
 	
 	packetData[0] = (pingTime >> 8) & 0xFF;
 	packetData[1] = pingTime & 0xFF;
 	
-	packetData[2] = (h >> 24) & 0xFF;
-	packetData[3] = (h >> 16) & 0xFF;
-	packetData[4] = (h >> 8) & 0xFF;
-	packetData[5] = h & 0xFF;
+	union {float humiFloat, byte humiBytes[4];} humiUnion;
+	humiUnion.humiFloat = h;
+	packetData[2] = humiUnion.humiBytes[0];
+	packetData[3] = humiUnion.humiBytes[1];
+	packetData[4] = humiUnion.humiBytes[2];
+	packetData[5] = humiUnion.humiBytes[3];
+
+	union {float tempFloat; byte tempBytes[4];} tempUnion;
+	tempUnion.tempFloat = t;
+	packetData[6] = tempUnion.tempBytes[0];
+	packetData[7] = tempUnion.tempBytes[1];
+	packetData[8] = tempUnion.tempBytes[2];
+	packetData[9] = tempUnion.tempBytes[3];
 	
-	packetData[6] = (t >> 24) & 0xFF;
-	packetData[7] = (t >> 16) & 0xFF;
-	packetData[8] = (t >> 8) & 0xFF;
-	packetData[9] = t & 0xFF;
-	
-	//send sensor data
+	//send the packet
 	Udp.beginPacket(targetIp, port);
 	Udp.write(packetData, 10);
 	Udp.endPacket;
