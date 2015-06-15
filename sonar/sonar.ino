@@ -1,12 +1,12 @@
 // sonar
 // to control an Arduino Uno based ultrasonic distance sensor
-// this code is not portable
 
 #include <SPI.h>
 #include <Ethernet.h>
 #include <EthernetUdp.h>
 #include <NewPing.h>
 #include <DHT.h>
+#include <ArduinoJson.h>
 
 //network
 byte mac[] = {}; //set mac!
@@ -39,7 +39,6 @@ void setup() {
 void loop() {
 	//get sensor data
 	unsigned int pingTime = pinger.ping(); //in microseconds
-
 	float h = dht.readHumidity();
 	float t = dht.readTemperature();
 	
@@ -48,33 +47,19 @@ void loop() {
 	if (isnan(h)) {h = 0;}
 	if (isnan(t)) {t = 0;}
 	
-	//prepare packet data
-	//uno uses 16-bit ints & 32 bit floats
-	byte packetData[12];
-	
-	packetData[0] = sensorType;
-	packetData[1] = sensorId;
-	
-	packetData[2] = (pingTime >> 8) & 0xFF;
-	packetData[3] = pingTime & 0xFF;
-	
-	union {float humiFloat; byte humiBytes[4];} humiUnion;
-	humiUnion.humiFloat = h;
-	packetData[4] = humiUnion.humiBytes[0];
-	packetData[5] = humiUnion.humiBytes[1];
-	packetData[6] = humiUnion.humiBytes[2];
-	packetData[7] = humiUnion.humiBytes[3];
+	//prepare packet data using json
+	StaticJsonBuffer<100> jsonBuffer;
+	JsonObject& data = jsonBuffer.createObject();
+	data["1"] = sensorType;
+	data["2"] = sensorId;
+	data["3"] = pingTime;
+	data["4"].set(h, 4);
+	data["5"].set(t, 4);
 
-	union {float tempFloat; byte tempBytes[4];} tempUnion;
-	tempUnion.tempFloat = t;
-	packetData[8] = tempUnion.tempBytes[0];
-	packetData[9] = tempUnion.tempBytes[1];
-	packetData[10] = tempUnion.tempBytes[2];
-	packetData[11] = tempUnion.tempBytes[3];
-	
 	//send the packet
 	Udp.beginPacket(targetIp, port);
-	Udp.write(packetData, 10);
+	data.printTo(Udp);
+	Udp.println();
 	Udp.endPacket();
 	
 	//wait before next transmission
