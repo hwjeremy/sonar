@@ -18,8 +18,8 @@ const short port = 1234;
 EthernetUDP Udp;
 
 //pinger
-const uint8_t pin_trigger = 7;
-const uint8_t pin_echo = 6;
+const byte pin_trigger = 7;
+const byte pin_echo = 6;
 const int maxDistance = 200; //in centimetres - check tank height!
 NewPing pinger(pin_trigger, pin_echo, maxDistance);
 

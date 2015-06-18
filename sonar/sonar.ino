@@ -9,7 +9,7 @@
 #include <ArduinoJson.h>
 
 //network
-byte mac[] = {}; //set mac!
+byte mac[] = {0x32, 0x81, 0x7F, 0x25, 0x6a, 0x7d}; //set mac!
 byte sensorId = 1;
 byte sensorType = 1;
 IPAddress localIp(192, 168, 1, 101);
@@ -18,16 +18,18 @@ const short port = 1234;
 EthernetUDP Udp;
 
 //pinger
-const byte pin_trigger = 1;
-const byte pin_echo = 2;
-const short maxDistance = 400; //in centimetres - check tank height!
+const byte pin_trigger = 7;
+const byte pin_echo = 6;
+const int maxDistance = 400; //in centimetres - check tank height!
 NewPing pinger(pin_trigger, pin_echo, maxDistance);
 
 //temp & humidity
 const byte pin_dht = 3;
 const byte dhtType = 22;
-bool dhtValid = false;
 DHT dht(pin_dht, dhtType);
+
+//watchdog
+const byte pin_watch = 4;
 
 short waitTime = 5000; //in milliseconds
 
@@ -37,6 +39,11 @@ void setup() {
 }
 
 void loop() {
+	//reset watchdog timer
+	digitalWrite(pin_watch, HIGH);
+	delay(20);
+	digitalWrite(pin_watch, LOW);
+	
 	//get sensor data
 	unsigned int pingTime = pinger.ping(); //in microseconds
 	float h = dht.readHumidity();
