@@ -14,7 +14,7 @@ const byte sensorId = 1;
 const byte sensorType = 1;
 IPAddress localIpFallback(192, 168, 1, 101);
 IPAddress targetIp(192, 168, 1, 100); //target minnie
-const short port = 1234;
+const short port = 2898;
 EthernetUDP Udp;
 
 //pinger
