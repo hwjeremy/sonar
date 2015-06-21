@@ -76,8 +76,7 @@ void loop() {
 	
 		//send the packet
 		//Udp.beginPacket(targetIp, port);
-		//data.printTo(Udp);
-		//Udp.println();
+		//Udp.write(data);
 		//Udp.endPacket();
 		
 		//send to serial instead for local testing
