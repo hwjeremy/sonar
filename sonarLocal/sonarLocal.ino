@@ -107,7 +107,7 @@ void loop() {
 		digitalWrite(pin_led, ledState);
 	}
 	
-	if (ledState == HIGH || millis() - lastTransmissionTime >= ledInterval)
+	if (ledState == HIGH && millis() - lastTransmissionTime >= ledInterval)
 	{
 		ledState = LOW;
 		digitalWrite(pin_led, ledState);
