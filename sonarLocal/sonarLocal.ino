@@ -50,6 +50,7 @@ void setup() {
 	Udp.begin(port);
 	Serial.begin(115200);
 	pinMode(pin_led, OUTPUT);
+	server.begin();
 }
 
 void loop() {
@@ -104,5 +105,54 @@ void loop() {
 	{
 		ledState = LOW;
 		digitalWrite(pin_led, ledState);
+	}
+	
+	EthernetClient client = server.available();
+	if (client){
+		bool lineBlank = true;
+		while(client.connected())
+		{
+			if (client.available())
+			{
+				char c = client.read();
+				if (c == '\n' && lineBlank)
+				{
+					client.println("HTTP/1.1 200 OK");
+					client.println("Content-Type: text/html");
+					client.println("Connection: close");
+					client.println("Refresh: 5");
+					client.println("<!doctype html");
+					client.println("<html>");
+					client.println("<strong>Thornleigh Sensor Unit</strong></br>");
+					client.print("Sensor type: ");
+					client.print(sensorType);
+					client.println("</br");
+					client.print("Sensor id: ");
+					client.print(sensorId);
+					client.println("</br>");
+					client.print("Time since last UDP transmission: ");
+					client.print(millis() - lastTransmissionTime);
+					client.println(" milliseconds</br>");
+					client.print("Ultrasonic ping time: ");
+					client.print(pingTime);
+					client.println(" microseconds</br>");
+					client.print("Temperature: ");
+					client.print(t);
+					client.println("</br>");
+					client.print("Humidity: ");
+					client.print(h);
+					client.println("</br></html>");
+					break;
+				}
+				if (c == "\n"){
+					lineBlank = true;
+				}			
+				else if (c != '\r'){
+					lineBlank = false;
+				}
+			}
+		}
+		delay(1);
+		client.stop();
 	}
 }
