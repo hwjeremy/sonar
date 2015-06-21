@@ -36,27 +36,37 @@ const byte pin_watch = 4;
 
 //indicator led (blink after each transmission)
 const byte pin_led = 13;
-const short ledInterval = 1000; //in milliseconds. Must be lower than transmissionInterval
+const short ledInterval = 500; //in milliseconds. Must be lower than transmissionInterval
 bool ledState = LOW;
 
 //transmission interval
-const short transmissionInterval = 5000; //in milliseconds. Must be higher than ledInterval
+const short transmissionInterval = 2500; //in milliseconds. Must be higher than ledInterval
 unsigned long lastTransmissionTime = 0;
 
 //web server
 EthernetServer server(80);
 
 void setup() {
-	//attempt to get an ip address via DHCP
+        delay(1000);
+        Serial.begin(115200);
+        Serial.println("Beginning setup...");
+        Serial.println("Attempting to get IP address via DHCP...");
 	if (Ethernet.begin(mac) == 0)
 	{
-		//fall back to default ip
+		Serial.println("Failed to get IP address. Using default.");
 		Ethernet.begin(mac, localIpFallback); //dns & gateway default to ip with final octet 1
 	}
+        else
+        {
+          Serial.println("Obtained IP address.");
+        }
+        Serial.println("Starting UDP...");
 	Udp.begin(port);
-	Serial.begin(115200);
+        Serial.println("Setting LED digital output...");
 	pinMode(pin_led, OUTPUT);
+        Serial.println("Starting webserver...");
 	server.begin();
+        Serial.println("Finished setup.");
 }
 
 void loop() {
