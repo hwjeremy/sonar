@@ -33,11 +33,11 @@ const byte pin_watch = 4;
 
 //indicator led (blink after each transmission)
 const byte pin_led = 13;
-const short ledInterval = 1000; //in milliseconds
+const short ledInterval = 1000; //in milliseconds. Must be lower than transmissionInterval
 bool ledState = LOW;
 
 //transmission interval
-const short transmissionInterval = 5000; //in milliseconds
+const short transmissionInterval = 5000; //in milliseconds. Must be higher than ledInterval
 unsigned long lastTransmissionTime = 0;
 
 void setup() {
