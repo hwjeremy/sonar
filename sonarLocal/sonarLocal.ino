@@ -9,10 +9,10 @@
 #include <ArduinoJson.h>
 
 //network - not functional in test, set for memory footprint
-byte mac[] = {0x32, 0x81, 0x7F, 0x25, 0x6a, 0x7d}; //set mac!
-byte sensorId = 1;
-byte sensorType = 1;
-IPAddress localIp(192, 168, 1, 101);
+const byte mac[] = {0x32, 0x81, 0x7F, 0x25, 0x6a, 0x7d}; //set mac!
+const byte sensorId = 1;
+const byte sensorType = 1;
+IPAddress localIpFallback(192, 168, 1, 101);
 IPAddress targetIp(192, 168, 1, 100); //target minnie
 const short port = 1234;
 EthernetUDP Udp;
@@ -41,7 +41,12 @@ const short transmissionInterval = 5000; //in milliseconds. Must be higher than 
 unsigned long lastTransmissionTime = 0;
 
 void setup() {
-	Ethernet.begin(mac, localIp); //dns & gateway default to ip with final octet 1
+	//attempt to get an ip address via DHCP
+	if (Ethernet.begin(mac) == 0)
+	{
+		//fall back to default ip
+		Ethernet.begin(mac, localIpFallback) //dns & gateway default to ip with final octet 1
+	}
 	Udp.begin(port);
 	Serial.begin(115200);
 	pinMode(pin_led, OUTPUT);
