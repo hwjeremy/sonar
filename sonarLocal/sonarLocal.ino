@@ -9,7 +9,7 @@
 #include <ArduinoJson.h>
 
 //network - not functional in test, set for memory footprint
-const byte mac[] = {0x32, 0x81, 0x7F, 0x25, 0x6a, 0x7d}; //set mac!
+byte mac[] = {0x32, 0x81, 0x7F, 0x25, 0x6a, 0x7d}; //set mac!
 const byte sensorId = 1;
 const byte sensorType = 1;
 IPAddress localIpFallback(192, 168, 1, 101);
@@ -21,11 +21,14 @@ EthernetUDP Udp;
 const byte pin_trigger = 7;
 const byte pin_echo = 6;
 const int maxDistance = 200; //in centimetres - check tank height!
+unsigned int pingTime = 0;
 NewPing pinger(pin_trigger, pin_echo, maxDistance);
 
 //temp & humidity
 const byte pin_dht = 2;
 const byte dhtType = 22;
+float t = 0;
+float h = 0;
 DHT dht(pin_dht, dhtType);
 
 //watchdog
@@ -40,12 +43,15 @@ bool ledState = LOW;
 const short transmissionInterval = 5000; //in milliseconds. Must be higher than ledInterval
 unsigned long lastTransmissionTime = 0;
 
+//web server
+EthernetServer server(80);
+
 void setup() {
 	//attempt to get an ip address via DHCP
 	if (Ethernet.begin(mac) == 0)
 	{
 		//fall back to default ip
-		Ethernet.begin(mac, localIpFallback) //dns & gateway default to ip with final octet 1
+		Ethernet.begin(mac, localIpFallback); //dns & gateway default to ip with final octet 1
 	}
 	Udp.begin(port);
 	Serial.begin(115200);
@@ -62,9 +68,9 @@ void loop() {
 		digitalWrite(pin_watch, LOW);
 	
 		//get sensor data
-		unsigned int pingTime = pinger.ping(); //in microseconds
-		float h = dht.readHumidity();
-		float t = dht.readTemperature();
+		pingTime = pinger.ping(); //in microseconds
+		h = dht.readHumidity();
+		t = dht.readTemperature();
 	
 		//check for a bad sensor read, set to 0 and handle server-side
 		//we know that relative humidity & temp are overwhelmingly unlikely to ever = 0
@@ -144,7 +150,7 @@ void loop() {
 					client.println("</br></html>");
 					break;
 				}
-				if (c == "\n"){
+				if (c == '\n') {
 					lineBlank = true;
 				}			
 				else if (c != '\r'){
