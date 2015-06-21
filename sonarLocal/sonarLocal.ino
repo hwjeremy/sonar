@@ -31,55 +31,74 @@ DHT dht(pin_dht, dhtType);
 //watchdog
 const byte pin_watch = 4;
 
-short waitTime = 500; //in milliseconds
+//indicator led (blink after each transmission)
+const byte pin_led = 13;
+const short ledInterval = 1000; //in milliseconds
+bool ledState = LOW;
+
+//transmission interval
+const short transmissionInterval = 5000; //in milliseconds
+unsigned long lastTransmissionTime = 0;
 
 void setup() {
 	Ethernet.begin(mac, localIp); //dns & gateway default to ip with final octet 1
 	Udp.begin(port);
 	Serial.begin(115200);
+	pinMode(pin_led, OUTPUT);
 }
 
 void loop() {
-	//reset watchdog timer
-	digitalWrite(pin_watch, HIGH);
-	delay(20);
-	digitalWrite(pin_watch, LOW);
+	if (millis() - lastTransmissionTime >= transmissionInterval)
+	{
+		//reset watchdog timer
+		digitalWrite(pin_watch, HIGH);
+		delay(20);
+		digitalWrite(pin_watch, LOW);
 	
-	//get sensor data
-	unsigned int pingTime = pinger.ping(); //in microseconds
-	float h = dht.readHumidity();
-	float t = dht.readTemperature();
+		//get sensor data
+		unsigned int pingTime = pinger.ping(); //in microseconds
+		float h = dht.readHumidity();
+		float t = dht.readTemperature();
 	
-	//check for a bad sensor read, set to 0 and handle server-side
-	//we know that relative humidity & temp are overwhelmingly unlikely to ever = 0
-	if (isnan(h)) {h = 0;}
-	if (isnan(t)) {t = 0;}
+		//check for a bad sensor read, set to 0 and handle server-side
+		//we know that relative humidity & temp are overwhelmingly unlikely to ever = 0
+		if (isnan(h)) {h = 0;}
+		if (isnan(t)) {t = 0;}
+		
+		//prepare packet data using json
+		StaticJsonBuffer<100> jsonBuffer;
+		JsonObject& data = jsonBuffer.createObject();
+		data["1"] = sensorType;
+		data["2"] = sensorId;
+		data["3"] = pingTime;
+		data["4"].set(h, 4);
+		data["5"].set(t, 4);
 	
-	//prepare packet data using json
-	StaticJsonBuffer<100> jsonBuffer;
-	JsonObject& data = jsonBuffer.createObject();
-	data["1"] = sensorType;
-	data["2"] = sensorId;
-	data["3"] = pingTime;
-	data["4"].set(h, 4);
-	data["5"].set(t, 4);
-
-	//send the packet
-	//Udp.beginPacket(targetIp, port);
-	//data.printTo(Udp);
-	//Udp.println();
-	//Udp.endPacket();
+		//send the packet
+		//Udp.beginPacket(targetIp, port);
+		//data.printTo(Udp);
+		//Udp.println();
+		//Udp.endPacket();
+		
+		//send to serial instead for local testing
+		Serial.println("\n-- Begin cycle --");
+		Serial.print("Ping time: ");
+		Serial.print(pingTime);
+		Serial.println(" microseconds");
+		Serial.print("Humidity:");
+		Serial.println(h);
+		Serial.print("Temperature:");
+		Serial.print(t);
+		
+		//cache transmission time and turn on indicator LED
+		lastTransmissionTime = millis();
+		ledState = HIGH;
+		digitalWrite(pin_led, ledState);
+	}
 	
-	//send to serial instead for local testing
-	Serial.println("\n-- Begin cycle --");
-	Serial.print("Ping time: ");
-	Serial.print(pingTime);
-	Serial.println(" microseconds");
-	Serial.print("Humidity:");
-	Serial.println(h);
-	Serial.print("Temperature:");
-	Serial.print(t);
-	
-	//wait before next transmission
-	delay(waitTime);
+	if (ledState == HIGH || millis() - lastTransmissionTime >= ledInterval)
+	{
+		ledState = LOW;
+		digitalWrite(pin_led, ledState);
+	}
 }
