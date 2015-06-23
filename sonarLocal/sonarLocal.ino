@@ -53,7 +53,8 @@ void setup() {
     Serial.println("Attempting to get IP address via DHCP...");
 	if (Ethernet.begin(mac) == 0)
 	{
-		Serial.println("Failed to get IP address. Using default.");
+		Serial.print("Failed to get IP address. Using default: ");
+		Serial.println(localIpFallback);
 		Ethernet.begin(mac, localIpFallback); //dns & gateway default to ip with final octet 1
 	}
     else
