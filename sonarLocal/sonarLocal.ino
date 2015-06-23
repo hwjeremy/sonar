@@ -47,10 +47,10 @@ unsigned long lastTransmissionTime = 0;
 EthernetServer server(80);
 
 void setup() {
-        delay(1000);
-        Serial.begin(115200);
-        Serial.println("Beginning setup...");
-        Serial.println("Attempting to get IP address via DHCP...");
+    delay(1000);
+    Serial.begin(115200);
+    Serial.println("Beginning setup...");
+    Serial.println("Attempting to get IP address via DHCP...");
 	if (Ethernet.begin(mac) == 0)
 	{
 		Serial.println("Failed to get IP address. Using default.");
