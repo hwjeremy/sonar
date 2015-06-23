@@ -129,13 +129,12 @@ void loop() {
 	EthernetClient client = server.available();
 	if (client){
 		bool lineBlank = true;
-		while(client.connected())
-		{
-			if (client.available())
-			{
+		Serial.println("New client connected");
+		while(client.connected()) {
+			if (client.available()) {
 				char c = client.read();
-				if (c == '\n' && lineBlank)
-				{
+				Serial.write(c);
+				if (c == '\n' && lineBlank) {
 					client.println("HTTP/1.1 200 OK");
 					client.println("Content-Type: text/html");
 					client.println("Connection: close");
@@ -166,12 +165,13 @@ void loop() {
 				if (c == '\n') {
 					lineBlank = true;
 				}			
-				else if (c != '\r'){
+				else if (c != '\r') {
 					lineBlank = false;
 				}
 			}
 		}
 		delay(1);
 		client.stop();
+		Serial.println("Client disconnected");
 	}
 }
