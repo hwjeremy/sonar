@@ -13,7 +13,7 @@ byte mac[] = {0x32, 0x81, 0x7F, 0x25, 0x6a, 0x7d}; //set mac!
 const byte sensorId = 1;
 const byte sensorType = 1;
 IPAddress localIpFallback(192, 168, 1, 101);
-IPAddress targetIp(192, 168, 1, 100); //target minnie
+IPAddress targetIp(192, 168, 1, 51); //target minnie
 const short port = 2898;
 EthernetUDP Udp;
 
@@ -100,13 +100,16 @@ void loop() {
 		data["5"].set(t, 4);
 	
 		//send the packet
-		//Udp.beginPacket(targetIp, port);
-		//data.printTo(Udp);
-		//Udp.println();
-		//Udp.endPacket();
+        Serial.println("\n-- Begin cycle --");
+        Serial.print("Sending UDP packet to ");
+        Serial.print(targetIp);
+        Serial.print(":");
+        Serial.println(port); 
+        Udp.beginPacket(targetIp, port);
+		data.printTo(Udp);
+		Udp.println();
+		Udp.endPacket();
 		
-		//send to serial instead for local testing
-		Serial.println("\n-- Begin cycle --");
 		Serial.print("Ping time: ");
 		Serial.print(pingTime);
 		Serial.println(" microseconds");
@@ -139,7 +142,8 @@ void loop() {
 					client.println("HTTP/1.1 200 OK");
 					client.println("Content-Type: text/html");
 					client.println("Connection: close");
-					client.println("Refresh: 5");
+					client.println("Refresh: 10");
+                    client.println();
 					client.println("<!doctype html");
 					client.println("<html>");
 					client.println("<strong>Thornleigh Sensor Unit</strong></br>");
