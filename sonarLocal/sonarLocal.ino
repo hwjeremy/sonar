@@ -40,7 +40,7 @@ const short ledInterval = 500; //in milliseconds. Must be lower than transmissio
 bool ledState = LOW;
 
 //transmission interval
-const short transmissionInterval = 2500; //in milliseconds. Must be higher than ledInterval
+const short transmissionInterval = 5000; //in milliseconds. Must be higher than ledInterval
 unsigned long lastTransmissionTime = 0;
 
 //web server
@@ -56,17 +56,18 @@ void setup() {
 		Serial.println("Failed to get IP address. Using default.");
 		Ethernet.begin(mac, localIpFallback); //dns & gateway default to ip with final octet 1
 	}
-        else
-        {
-          Serial.println("Obtained IP address.");
-        }
-        Serial.println("Starting UDP...");
+    else
+    {
+    	Serial.print("Obtained IP address: ");
+		Serial.println(Ethernet.localIP());
+    }
+    Serial.println("Starting UDP...");
 	Udp.begin(port);
-        Serial.println("Setting LED digital output...");
+    Serial.println("Setting LED digital output...");
 	pinMode(pin_led, OUTPUT);
-        Serial.println("Starting webserver...");
+    Serial.println("Starting webserver...");
 	server.begin();
-        Serial.println("Finished setup.");
+    Serial.println("Finished setup.");
 }
 
 void loop() {
@@ -98,7 +99,8 @@ void loop() {
 	
 		//send the packet
 		//Udp.beginPacket(targetIp, port);
-		//Udp.write(data);
+		//data.printTo(Udp);
+		//Udp.println();
 		//Udp.endPacket();
 		
 		//send to serial instead for local testing
