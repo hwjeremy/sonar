@@ -64,10 +64,11 @@ void setup() {
     }
     Serial.println("Starting UDP...");
 	Udp.begin(port);
-    Serial.println("Setting LED digital output...");
-	pinMode(pin_led, OUTPUT);
-    Serial.println("Starting webserver...");
+	Serial.println("Starting webserver...");
 	server.begin();
+    Serial.println("Setting digital outputs...");
+	pinMode(pin_led, OUTPUT);
+	pinMode(pin_watch, OUTPUT);
     Serial.println("Finished setup.");
 }
 
